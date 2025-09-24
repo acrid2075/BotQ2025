@@ -1,3 +1,6 @@
 /data/
 __pycache__/
 *.py[cod]
+
+# This is my test file -- Norman
+test.ipynb 
