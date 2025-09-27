@@ -48,7 +48,7 @@ merged_df[ROLL_DOWN_COLUMNS] = (
     .ffill() # Forward fill any data
 )
 
-merged_df.rename(columns={'chtq': 'cash', 'actq': 'current', 'atq': 'assets'}, inplace=True)
+merged_df.rename(columns={'chq': 'cash', 'actq': 'current', 'atq': 'assets'}, inplace=True)
 
 # Drop unnecessary columns
 merged_df.drop(columns=COLUMNS_TO_DROP, inplace=True)
