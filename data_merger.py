@@ -46,10 +46,6 @@ print("Successfully merged the data frames")
 merged_df[ROLL_DOWN_COLUMNS] = (
     merged_df.groupby("cusip", group_keys=False)[ROLL_DOWN_COLUMNS] # Group by cusip to roll down the columns
     .ffill() # Forward fill any data
-    #.bfill() # Backward fill any data that is left
-    # NOTE the bfill might be nessisary, I thought we would rather be safe than sorry
-    # NOTE Actually, because of sample concerns I think we probably shouldn't backfill. 
-    # We'll just drop those rows
 )
 
 merged_df.rename(columns={'chtq': 'cash', 'actq': 'current', 'atq': 'assets'}, inplace=True)
@@ -58,9 +54,8 @@ merged_df.rename(columns={'chtq': 'cash', 'actq': 'current', 'atq': 'assets'}, i
 merged_df.drop(columns=COLUMNS_TO_DROP, inplace=True)
 
 # Drop to the original set of monthly rows
-merged_df = merged_df.loc[merged_df.date.isin[crsp_df.date]]
-# FIXME: is the column labeled return?
-merged_df = merged_df.loc[merged_df['return'].dropna().index]
+merged_df = merged_df.loc[merged_df.date.isin(crsp_df.date)]
+merged_df = merged_df.loc[merged_df['ret'].dropna().index]
 
 # Save the merged data frame to a csv file
 merged_df.to_feather(SAVE_PATH)
