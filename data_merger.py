@@ -32,19 +32,19 @@ crsp_df = crsp_df.rename(columns={'caldt': 'date'})
 # NOTE I don't know why compustat has 9 characters and crsp has 8
 # but I'm pretty sure this lines them up
 # FIXME: This seems concerning
-compustat_df['cusip'] = compustat_df['cusip'].astype(str).str[:8]
+compustat_df.rename(columns={'LPERMNO':'permno'}, inplace=True)
 
 # NOTE we might want to get a table that maps gvkeys to permn
 # because apparently the cusip's can change
 
 # Merge the data frames
-merged_df = pd.merge(crsp_df, compustat_df, on=['cusip', 'date'], how='outer')
-merged_df = merged_df.sort_values(by=['cusip', 'date'])
+merged_df = pd.merge(crsp_df, compustat_df, on=['permno', 'date'], how='outer')
+merged_df = merged_df.sort_values(by=['permno', 'date'])
 print("Successfully merged the data frames")
 
 # Roll down columns
 merged_df[ROLL_DOWN_COLUMNS] = (
-    merged_df.groupby("cusip", group_keys=False)[ROLL_DOWN_COLUMNS] # Group by cusip to roll down the columns
+    merged_df.groupby("permno", group_keys=False)[ROLL_DOWN_COLUMNS] # Group by cusip to roll down the columns
     .ffill() # Forward fill any data
 )
 
@@ -52,10 +52,11 @@ merged_df.rename(columns={'chq': 'cash', 'actq': 'current', 'atq': 'assets'}, in
 
 # Drop unnecessary columns
 merged_df.drop(columns=COLUMNS_TO_DROP, inplace=True)
-
+print(merged_df)
 # Drop to the original set of monthly rows
-merged_df = merged_df.loc[merged_df.date.isin(crsp_df.date)]
-merged_df = merged_df.loc[merged_df['ret'].dropna().index]
+# merged_df = merged_df.loc[merged_df.date.isin(crsp_df.date)] FIXME
+merged_df = merged_df.loc[merged_df['ret'].dropna().index].reset_index(drop=True)
+print(merged_df)
 
 # Save the merged data frame to a csv file
 merged_df.to_feather(SAVE_PATH)
